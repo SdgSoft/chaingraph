@@ -22,6 +22,7 @@ import { isHideEditor } from '@/components/flow/nodes/ChaingraphNode/ports/utils
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
+import { useExecutionID } from '@/store/execution'
 import { useStore } from '@xyflow/react'
 import {
 
@@ -42,6 +43,7 @@ export interface StringPortProps {
 const zoomSelector = s => s.transform[2] ?? 1
 
 export function StringPort(props: PropsWithChildren<StringPortProps>) {
+  const executionID = useExecutionID()
   const { node, port, context } = props
   const {
     updatePortValue,
@@ -139,6 +141,7 @@ export function StringPort(props: PropsWithChildren<StringPortProps>) {
       <div className={cn(
         'flex flex-col w-full',
         config.direction === 'output' ? 'items-end' : 'items-start',
+        'truncate',
       )}
       >
         <PortTitle>
@@ -155,11 +158,17 @@ export function StringPort(props: PropsWithChildren<StringPortProps>) {
               'w-full',
               // errorMessage && 'border-red-500',
               'nodrag',
+              'placeholder:text-neutral-400 placeholder:opacity-40',
             )}
-            placeholder={port.getConfig().title ?? 'Text'}
+            placeholder={
+              port.getConfig().ui?.placeholder
+              ?? port.getConfig().title
+              ?? port.getConfig().key
+              ?? 'Text'
+            }
             type={ui?.isPassword ? 'password' : undefined}
             data-1p-ignore
-            disabled={ui?.disabled ?? false}
+            disabled={executionID ? true : ui?.disabled ?? false}
           />
         )}
 
@@ -188,8 +197,15 @@ export function StringPort(props: PropsWithChildren<StringPortProps>) {
                 'nodrag',
                 'max-w-full',
                 focused && 'nowheel',
+                'placeholder:text-neutral-400 placeholder:opacity-40',
               )}
-              placeholder="String"
+              placeholder={
+                port.getConfig().ui?.placeholder
+                ?? port.getConfig().title
+                ?? port.getConfig().key
+                ?? 'Text'
+              }
+              disabled={executionID ? true : ui?.disabled ?? false}
             />
           </>
         )}

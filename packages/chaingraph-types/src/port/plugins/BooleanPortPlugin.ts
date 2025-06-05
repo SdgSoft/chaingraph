@@ -60,11 +60,15 @@ export const BooleanPortPlugin: IPortPlugin<'boolean'> = {
   configSchema,
   valueSchema,
   serializeValue: (value: BooleanPortValue): JSONValue => {
+    if (value === undefined || value === null) {
+      return false
+    }
+
     try {
       if (!isBooleanPortValue(value)) {
         throw new PortError(
           PortErrorType.SerializationError,
-          'Invalid boolean value structure',
+          `Invalid boolean value structure, actual: ${typeof value} ${JSON.stringify(value)}, expected: boolean`,
         )
       }
       return value
@@ -76,6 +80,10 @@ export const BooleanPortPlugin: IPortPlugin<'boolean'> = {
     }
   },
   deserializeValue: (data: JSONValue) => {
+    if (data === undefined || data === null) {
+      return false
+    }
+
     try {
       if (!isBooleanPortValue(data)) {
         throw new PortError(

@@ -8,7 +8,7 @@
 
 import type { EdgeMetadata, IEdge } from '.'
 import type { INode } from '../node'
-import type { IPort } from '../port'
+import type { AnyPortConfig, IPort } from '../port'
 import { EdgeStatus } from '.'
 import { NodeStatus } from '../node'
 import { PortDirection } from '../port'
@@ -65,6 +65,18 @@ export class Edge implements IEdge {
         return true
       }
 
+      if (sourcePortKind === 'any') {
+        // get the underlying type of source any port
+        // and check if it is compatible with the target port
+        const sourcePortConfig = this.sourcePort.getConfig() as AnyPortConfig
+        const sourcePortUnderlyingType = sourcePortConfig.underlyingType
+        if (sourcePortUnderlyingType) {
+          if (sourcePortUnderlyingType.type === targetPortKind) {
+            return true
+          }
+        }
+      }
+
       throw new Error(`Incompatible port types: ${sourcePortKind} -> ${targetPortKind}`)
     }
 
@@ -114,6 +126,7 @@ export class Edge implements IEdge {
       throw new Error(`Source port ${this.sourcePort.id} has no data to transfer.`)
     }
     this.targetPort.setValue(data)
+    this.targetNode.updatePort(this.targetPort)
   }
 
   updateMetadata(metadata: Partial<EdgeMetadata>): void {
